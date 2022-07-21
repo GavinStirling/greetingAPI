@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 // Gives functionality of a rest controller
@@ -18,6 +19,9 @@ public class GreetingsController {
     @Autowired
     GreetingsRepository greetingsRepository;
 
+    @Autowired
+    GreetingsService greetingsService;
+
     // Catch an exception and send back an error message
     @ExceptionHandler
     public ResponseEntity<String> handleExceptions(Exception exception){
@@ -27,11 +31,11 @@ public class GreetingsController {
     // ResponseEntity -> Makes a custom response
     // - Set status code -> HTTP status -> Status codes stored
     // - Provide body/data needed
-//    @GetMapping("/greeting/{id}")
-//    public ResponseEntity<Greeting> getGreetingById(@PathVariable String id){
-//        Greeting greeting = greetingsRepository.getGreetingFromId(id);
-//        return ResponseEntity.status(HttpStatus.FOUND).body(greeting);
-//    }
+    @GetMapping("/greeting/{id}")
+    public ResponseEntity<Greeting> getGreetingById(@PathVariable String id){
+        Greeting greeting = greetingsService.findGreetingById(id);
+        return ResponseEntity.status(HttpStatus.FOUND).body(greeting);
+    }
 
     @GetMapping("/greetings")
     public ResponseEntity<List<Greeting>> getGreetings(){
@@ -39,35 +43,44 @@ public class GreetingsController {
         return ResponseEntity.status(HttpStatus.FOUND).body(greetings);
     }
 
-//    @GetMapping("/random")
-//    public ResponseEntity<Greeting> getRandomGreeting(){
-//        Greeting greeting = greetingsRepository.getRandomGreeting();
-//        return ResponseEntity.status(HttpStatus.FOUND).body(greeting);
-//    }
+    @GetMapping("/random")
+    public ResponseEntity<Greeting> getRandomGreeting(){
+        Greeting greeting = greetingsService.findRandomGreeting();
+        return ResponseEntity.status(HttpStatus.FOUND).body(greeting);
+    }
+
+    @GetMapping("/greeting-ids")
+    public ResponseEntity<List<String>> getGreetingIds(){
+        List<String> ids = greetingsService.findAllGreetingIds();
+        return ResponseEntity.status(HttpStatus.FOUND).body(ids);
+    }
 
     // CREATE A ENDPOINT TO DELETE A GREETING
     // TO DELETE THE GREETING -> SEND THE GREETING TO DELETE IN THE REQUEST
     // @DeleteMapping
-//    @DeleteMapping("/delete-greeting/{id}")
-//    public ResponseEntity<String> deleteGreetingById(@PathVariable String id){
-//        greetingsRepository.deleteGreeting(id);
-//        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Greeting deleted");
-//    }
+    @DeleteMapping("/greeting/{id}")
+    @Transactional
+    public ResponseEntity<String> deleteGreetingById(@PathVariable String id){
+        greetingsService.deleteGreetingById(id);
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Greeting deleted");
+    }
 
     // CREATE -> POST
     // @RequestBody -> EXTRACT DATA FROM BODY OF REQUEST
     // - IF JSON OBJECT MATCHES Greeting FIELDS SPRING CAN TURN IT INTO A Greeting OBJECT FOR YOU TO USE
     @PostMapping("/greeting")
+    @Transactional
     public ResponseEntity<String> createGreeting(@RequestBody Greeting greeting){
-        greetingsRepository.save(greeting);
+        greetingsService.createGreeting(greeting);
         return ResponseEntity.status(HttpStatus.CREATED).body("Created greeting with ID: " + greeting.getId());
     }
 
     // UPDATE -> PUT
     // - YOU CAN GET ACCESS TO MULTIPLE BITS OF INFORMATION E.G. REQUEST BODY & PATH VARIABLE
     @PutMapping("/greeting/{id}")
+    @Transactional
     public ResponseEntity<String> updateGreeting(@RequestBody Greeting newGreeting, @PathVariable String id){
-        greetingsRepository.save(newGreeting);
+        greetingsService.createGreeting(newGreeting);
         return ResponseEntity.status(HttpStatus.OK).body("Updated greeting with ID: " + newGreeting.getId());
     }
 }
