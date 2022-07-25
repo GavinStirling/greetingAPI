@@ -38,8 +38,8 @@ public class GreetingsController {
     }
 
     @GetMapping("/greetings")
-    public ResponseEntity<List<Greeting>> getGreetings(){
-        List<Greeting> greetings = greetingsRepository.findAll();
+    public ResponseEntity<List<String>> getGreetings(){
+        List<String> greetings = greetingsService.findAllGreetingIds();
         return ResponseEntity.status(HttpStatus.FOUND).body(greetings);
     }
 
